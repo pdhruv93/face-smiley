@@ -1,0 +1,171 @@
+<style>
+img{
+	height: 100%;
+    width: 32%;
+}
+
+.images{
+	z-index: 1;
+	position: relative;
+}
+
+.main{
+	width:100%;
+	height: 100%;
+}
+
+.sun {
+    left: 50%;
+    position: absolute;
+    top: 100%;
+	height: 100px;
+	width: 100px;
+	background-color: yellow;
+	border-radius: 50%;
+	display: inline-block;
+}
+
+@-webkit-keyframes orbit2 {
+	from { 	 }
+	to   {  -webkit-transform: rotate(360deg) translateX(-800%) rotate(-360deg); }
+}
+
+.moon {
+    left: 50%;
+    position: absolute;
+    top: 100%;
+	height: 100px;
+	width: 100px;
+	background-color: white;
+	border-radius: 50%;
+	display: inline-block;
+}
+
+@-webkit-keyframes orbit1 {
+	from { 	 }
+	to   {  -webkit-transform: rotate(360deg) translateX(800%) rotate(-360deg); }
+}
+
+</style>
+
+
+<script src="https://code.jquery.com/jquery-1.9.1.min.js"></script>
+<script type="text/javascript"> 
+
+$( document ).ready(function() {
+	
+	var skyColors=["orange", "#7ad9ef", "yellow" , "#7ad9ef", "orange"];
+
+	   	 
+	 var sunriseTime="";
+	 var sunsetTime="";
+	 var noonTime="";
+	 var dayLength="";
+	 var timeRanges="";
+	 
+	 var sunRiseTomorrow="";
+	 
+	 
+	 jQuery.ajax({
+		url : "https://api.sunrise-sunset.org/json?lat=60.248738&lng=25.010646&date=today&formatted=0",
+		type : "POST",
+		dataType : "json",
+		beforeSend : function() {
+		},
+		success : function(data) {
+			
+			sunriseTime=Date.parse(data["results"]["sunrise"]);
+			noonTime=Date.parse(data["results"]["solar_noon"]);
+			sunsetTime=Date.parse(data["results"]["sunset"]);
+			
+			dayLength=sunsetTime-sunriseTime;
+			
+			console.log("Sun Rise Time:"+sunriseTime);
+			console.log("Sun Noon Time:"+noonTime);
+			console.log("Sun Set Time:"+sunsetTime);
+			
+			console.log("Day Length:"+dayLength);
+			
+			var equalDivisons=dayLength/6;
+			//console.log("Equal Divisons:"+equalDivisons);
+			timeRanges = [equalDivisons, equalDivisons*2, equalDivisons*3, equalDivisons*4, equalDivisons*5];
+			
+			}
+	});
+	
+	
+	var skyColor="";
+
+	 function refreshData()
+	{
+		
+		var currentTime=new Date().getTime();
+		
+		var diffFromSunRise=currentTime-sunriseTime;
+		
+		//console.log(timeRanges);
+		//console.log("DiffFromSunRise:"+diffFromSunRise);
+		
+		if(diffFromSunRise>0 && diffFromSunRise<timeRanges[0])
+		{
+			skyColor=skyColors[0];
+			//console.log("Part1");
+		}
+		else if(diffFromSunRise>timeRanges[1] && diffFromSunRise<timeRanges[2])
+		{
+			skyColor=skyColors[1];
+			//console.log("Part2");
+		}
+		else if(diffFromSunRise>timeRanges[2] && diffFromSunRise<timeRanges[3])
+		{
+			skyColor=skyColors[2];
+			//console.log("Part3");
+		}
+		else if(diffFromSunRise>timeRanges[3] && diffFromSunRise<timeRanges[4])
+		{
+			skyColor=skyColors[3];
+			//console.log("Part4");
+		}
+		else if(diffFromSunRise>timeRanges[4] && diffFromSunRise<dayLength)
+		{
+			skyColor=skyColors[4];
+			//console.log("Part5");
+		}
+		else
+		{
+			skyColor="gray";
+			//console.log("Part5");
+		}
+		
+		var angle=(180*diffFromSunRise)/dayLength;
+		
+		$(".sun").css({transform: 'rotate('+angle+'deg) translateX(-800%)', '-webkit-animation': 'orbit2 '+dayLength+'s linear infinite'});
+		$(".moon").css({transform: 'rotate('+angle+'deg) translateX(800%)', '-webkit-animation': 'orbit1 '+dayLength+'s linear infinite'});
+		
+		$(".main").css('background-color', skyColor);
+	
+		
+		
+		setTimeout(refreshData, 120000);
+		
+	}
+	 
+	 refreshData();
+	 
+});
+      
+ </script> 
+
+
+<div class="main">
+	<div class="sun"></div>
+	<div class="moon"></div>
+
+	<div class="images">
+		<img src="tree.png">
+	<img src="tree.png">
+	<img src="tree.png">
+	</div>
+  
+ 
+</div>
